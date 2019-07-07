@@ -2,7 +2,7 @@ package controller
 
 import interfaces.RequestDeckInterface
 import interfaces.RequestListener
-import models.Deck
+import models.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -87,4 +87,38 @@ object DeckController
 
             })
     }
+
+    fun addCardsToPiles(deckId: String, pileName: String, cards: List<Card>
+                            ,requestListener: RequestListener)
+    {
+        var cardForPiles = ""
+
+        for(c in cards)
+        {
+            cardForPiles+=c.code+","
+        }
+
+        cardForPiles = cardForPiles.substring(0,cardForPiles.length-1)
+
+        cardsClient.addCardsToPiles(deckId,pileName,cardForPiles)
+            .enqueue(object : Callback<Pile>
+            {
+                override fun onFailure(call: Call<Pile>, t: Throwable)
+                {
+                    requestListener.onError(t.message.toString())
+                }
+
+                override fun onResponse(call: Call<Pile>, response: Response<Pile>)
+                {
+                    val body = response.body()
+                    if(body != null)
+                    {
+                        requestListener.onComplete(body)
+                    }
+                }
+
+            })
+    }
+
+
 }
